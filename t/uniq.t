@@ -309,16 +309,20 @@ is( scalar( uniqstr qw( a b c d a b e ) ), 5, 'uniqstr() in scalar context' );
 
     sub new { bless { num => $_[1] }, $_[0] }
 
+    package NoNumify;
+
     package main;
-    use Scalar::Util qw( refaddr );
 
     my @nums = map { Numify->new( $_ ) } qw( 2 2 5 );
 
-    # is_deeply wants to use eq overloading
     my @ret = uniqnum @nums;
+
+    # is_deeply wants to use eq overloading
+    bless $_, 'NoNumify'
+        for @nums, @ret;
     ok( scalar @ret == 2 &&
-        refaddr $ret[0] == refaddr $nums[0] &&
-        refaddr $ret[1] == refaddr $nums[2],
+        $ret[0] == $nums[0] &&
+        $ret[1] == $nums[2],
                'uniqnum respects numify overload' );
 }
 
